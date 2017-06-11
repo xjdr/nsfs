@@ -1,0 +1,17 @@
+### Java template
+*.class
+
+*.iml
+.idea/
+target/
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+dependency-reduced-pom.xml
+infer-out/
+
