@@ -6,6 +6,7 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
+import com.xjeffrose.nsfs.codegen.JavaGenerator;
 import com.xjeffrose.nsfs.http.Router;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -24,7 +25,7 @@ import okio.ByteString;
 
 
 @Slf4j
-public class Server {
+public class Server implements Runnable {
 
   private final Router router = new Router();
   private final Moshi moshi = new Moshi.Builder().build();
@@ -35,22 +36,29 @@ public class Server {
 
     // Need to do more stuffs in here
 
+    String respMsg = "OK";
+
     FullHttpResponse response = new DefaultFullHttpResponse(
       HttpVersion.HTTP_1_1,
       HttpResponseStatus.OK,
-      Unpooled.copiedBuffer(new String("ok").getBytes())
-    );
+      Unpooled.copiedBuffer(respMsg.getBytes()));
+
+    response.headers().set(CONTENT_TYPE, "text/plain");
+    response.headers().setInt(CONTENT_LENGTH, respMsg.length());
 
     return response;
   };
 
   private final Function<HttpRequest, HttpResponse> addFunction = x -> {
     try {
+
       HostedFunction f = adapter
         .fromJson(ByteString.of(((FullHttpRequest) x).content().nioBuffer()).utf8());
-      router.addRoute(f.route, healthCheck);
 
-    } catch (IOException e) {
+      // TODO(JR): We need a better naming convention
+      router.addRoute(f.route, JavaGenerator.generateClass(f.route, f.functionBody));
+
+    } catch (Exception e) {
       log.error("Error Registering Function", (Throwable) e);
       HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
         HttpResponseStatus.BAD_REQUEST);
@@ -85,6 +93,11 @@ public class Server {
       log.error("Failed to start people server", e);
     }
 
+  }
+
+  @Override
+  public void run() {
+    start();
   }
 
   @AllArgsConstructor
