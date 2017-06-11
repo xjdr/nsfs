@@ -1,7 +1,12 @@
 package com.xjeffrose.nsfs;
 
+import com.squareup.javapoet.JavaFile;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
+import io.netty.buffer.ByteBuf;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.UUID;
 import okio.ByteString;
 
 import com.squareup.javapoet.AnnotationSpec;
@@ -25,6 +30,8 @@ import static javax.lang.model.element.Modifier.STATIC;
 public class FunctionGenerator {
 
   static final ClassName BYTE_STRING = ClassName.get(ByteString.class);
+  static final ClassName BYTE_BUF = ClassName.get(ByteBuf.class);
+
   static final ClassName HTTP_REQUEST = ClassName.get(HttpRequest.class);
   static final ClassName HTTP_RESPONSE = ClassName.get(HttpResponse.class);
 
@@ -33,20 +40,24 @@ public class FunctionGenerator {
   }
 
   public static String generateClass(String functionBody) {
+    UUID functionID = UUID.randomUUID();
 
-    MethodSpec main = MethodSpec.methodBuilder("main")
-      .addModifiers(PUBLIC, STATIC)
-      .returns(void.class)
-      .addParameter(String[].class, "args")
-      .addStatement("$T.out.println($S)", System.class, "Hello, JavaPoet!")
+    MethodSpec functionEntryPoint = MethodSpec.methodBuilder("Hello")
+      .addModifiers(PUBLIC)
+      .returns(HttpResponse.class)
+      .addStatement("return $S", "hello again")
       .build();
 
-    TypeSpec nsfsGeneratedFunction = TypeSpec.classBuilder("NSFSGeneratedFunction")
+    TypeSpec nsfsGeneratedFunction = TypeSpec.classBuilder(functionID.toString())
       .addModifiers(PUBLIC, FINAL)
-      .addMethod(main)
+      .addMethod(functionEntryPoint)
       .build();
 
-    return "foo";
+    JavaFile javaFile = JavaFile.builder("com.xjeffrose.nsfs", nsfsGeneratedFunction)
+      .build();
+
+    // need to return uuid & class body
+    return javaFile.toString();
   }
 
 
