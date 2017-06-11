@@ -1,7 +1,7 @@
 package com.xjeffrose.nsfs.codegen;
 
-import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.JavaFile;
+import com.xjeffrose.nsfs.compiler.InMemoryCompiler;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -11,43 +11,38 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 import okio.ByteString;
 
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.NameAllocator;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.codehaus.groovy.runtime.powerassert.SourceText;
 
-import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
 
 public class JavaGenerator {
 
-  static final ClassName BYTE_STRING = ClassName.get(ByteString.class);
-  static final ClassName BYTE_BUF = ClassName.get(ByteBuf.class);
-  static final ClassName UNPOOLED = ClassName.get(Unpooled.class);
+  private static final String className = "Hello";
+  private static final String entryPointName = "getFunction";
+  private static final TypeName functionSpec = ParameterizedTypeName.get(Function.class, HttpRequest.class, HttpResponse.class);
 
-  static final ClassName FUNCTION = ClassName.get(Function.class);
-  static final ClassName HTTP_VERSION = ClassName.get(HttpVersion.class);
-  static final ClassName HTTP_REQUEST = ClassName.get(HttpRequest.class);
-  static final ClassName HTTP_RESPONSE = ClassName.get(HttpResponse.class);
-  static final ClassName FULL_HTTP_RESPONSE = ClassName.get(FullHttpResponse.class);
-  static final ClassName HTTP_RESPONSE_STATUS = ClassName.get(HttpResponseStatus.class);
-  static final ClassName DEFAULT_FULL_HTTP_RESPONSE = ClassName.get(DefaultFullHttpResponse.class);
+  private static final ClassName BYTE_STRING = ClassName.get(ByteString.class);
+  private static final ClassName BYTE_BUF = ClassName.get(ByteBuf.class);
+  private static final ClassName UNPOOLED = ClassName.get(Unpooled.class);
+
+  private static final ClassName FUNCTION = ClassName.get(Function.class);
+  private static final ClassName HTTP_VERSION = ClassName.get(HttpVersion.class);
+  private static final ClassName HTTP_REQUEST = ClassName.get(HttpRequest.class);
+  private static final ClassName HTTP_RESPONSE = ClassName.get(HttpResponse.class);
+  private static final ClassName FULL_HTTP_RESPONSE = ClassName.get(FullHttpResponse.class);
+  private static final ClassName HTTP_RESPONSE_STATUS = ClassName.get(HttpResponseStatus.class);
+  private static final ClassName DEFAULT_FULL_HTTP_RESPONSE = ClassName.get(DefaultFullHttpResponse.class);
 
   static final FieldSpec okResponse = FieldSpec.builder(HttpResponse.class, "defaultOkResponse")
     .addModifiers(PRIVATE, FINAL)
@@ -61,28 +56,46 @@ public class JavaGenerator {
       UNPOOLED)
     .build();
 
+  static final FieldSpec functionToRegister = FieldSpec.builder(functionSpec, "functionToRegister").build();
+
+
   public JavaGenerator() {
 
   }
 
-  public static Map<String, JavaFile> generateClass(String functionBody) {
+  public static Function<HttpRequest, HttpResponse> generateClass(String functionBody) throws Exception {
     //UUID functionID = UUID.randomUUID();
 
-    MethodSpec functionEntryPoint = MethodSpec.methodBuilder("Hello")
+    MethodSpec functionEntryPoint = MethodSpec.methodBuilder(entryPointName)
       .addModifiers(PUBLIC)
-      .returns(HttpResponse.class)
-      .addStatement("return defaultOkResponse")
+      .returns(functionSpec)
+      .addStatement("functionToRegister = x -> { "
+        + "return new $T("
+        + "$T.HTTP_1_1,"
+        + "$T.OK); };",
+        DEFAULT_FULL_HTTP_RESPONSE,
+        HTTP_VERSION,
+        HTTP_RESPONSE_STATUS)
+      .addStatement("return functionToRegister")
       .build();
 
-    TypeSpec nsfsGeneratedFunction = TypeSpec.classBuilder("Hello")
+    TypeSpec nsfsGeneratedClass = TypeSpec.classBuilder(className)
       .addModifiers(PUBLIC, FINAL)
+      .addMethod(functionEntryPoint)
+      .addField(functionToRegister)
       .addField(okResponse)
       .build();
 
-    JavaFile javaFile = JavaFile.builder("com.xjeffrose.nsfs", nsfsGeneratedFunction)
+    JavaFile javaFile = JavaFile.builder("com.xjeffrose.nsfs", nsfsGeneratedClass)
       .build();
 
-    return ImmutableMap.of("Hello", javaFile);
+    Class<?> codeGenClass = InMemoryCompiler.compile("com.xjeffrose.nsfs." + className, javaFile.toString());
+    Object o = codeGenClass.newInstance();
+    Method m = codeGenClass.getDeclaredMethod(entryPointName);
+
+    Function<HttpRequest, HttpResponse> functionToRegister = (Function<HttpRequest, HttpResponse>) m.invoke(o);
+
+    return functionToRegister;
   }
 
 
