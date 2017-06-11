@@ -182,7 +182,7 @@
           </compilerArgs>
         </configuration>
       </plugin>
-     
+
     </plugins>
   </build>
 
