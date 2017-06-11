@@ -11,12 +11,6 @@ public class ExtendedStandardJavaFileManager extends ForwardingJavaFileManager<J
   private CompiledCode compiledCode;
   private DynamicClassLoader cl;
 
-  /**
-   * Creates a new instance of ForwardingJavaFileManager.
-   *
-   * @param fileManager delegate to this file manager
-   * @param cl
-   */
   protected ExtendedStandardJavaFileManager(JavaFileManager fileManager, CompiledCode compiledCode, DynamicClassLoader cl) {
     super(fileManager);
     this.compiledCode = compiledCode;
