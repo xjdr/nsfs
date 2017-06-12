@@ -87,7 +87,7 @@ public class JavaGenerator {
       .build();
 
     // For Debugging - Keep Commented OUT
-    System.out.println(javaFile.toString());
+    //System.out.println(javaFile.toString());
 
     Class<?> codeGenClass = InMemoryCompiler.compile("com.xjeffrose.nsfs." + className, javaFile.toString());
     Object o = codeGenClass.newInstance();
