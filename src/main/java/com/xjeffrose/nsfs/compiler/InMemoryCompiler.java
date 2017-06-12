@@ -4,7 +4,9 @@ import java.util.Arrays;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class InMemoryCompiler {
   static JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
 

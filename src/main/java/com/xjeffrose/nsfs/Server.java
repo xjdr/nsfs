@@ -52,13 +52,13 @@ public class Server implements Runnable {
   private final Function<HttpRequest, HttpResponse> addFunction = x -> {
     try {
 
-      HostedFunction f = adapter
-        .fromJson(ByteString.of(((FullHttpRequest) x).content().nioBuffer()).utf8());
+      HostedFunction f = adapter.fromJson(ByteString.of(((FullHttpRequest) x).content().nioBuffer()).utf8());
 
       // TODO(JR): We need a better naming convention
       router.addRoute(f.route, JavaGenerator.generateClass(f.route, f.functionBody));
 
     } catch (Exception e) {
+
       log.error("Error Registering Function", (Throwable) e);
       HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
         HttpResponseStatus.BAD_REQUEST);
@@ -68,6 +68,7 @@ public class Server implements Runnable {
       return response;
     }
 
+    // TODO(JR): We need a more reasonable return body with more useful info
     FullHttpResponse response = new DefaultFullHttpResponse(
       HttpVersion.HTTP_1_1,
       HttpResponseStatus.OK,

@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import javax.tools.SimpleJavaFileObject;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class CompiledCode extends SimpleJavaFileObject {
   private ByteArrayOutputStream baos = new ByteArrayOutputStream();
 

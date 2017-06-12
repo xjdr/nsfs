@@ -12,6 +12,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import java.lang.reflect.Method;
 import java.util.function.Function;
+import lombok.extern.slf4j.Slf4j;
 import okio.ByteString;
 
 import com.squareup.javapoet.ClassName;
@@ -26,6 +27,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
+@Slf4j
 public class JavaGenerator {
 
   private static final String entryPointName = "getFunction";
@@ -43,7 +45,7 @@ public class JavaGenerator {
   private static final ClassName HTTP_RESPONSE_STATUS = ClassName.get(HttpResponseStatus.class);
   private static final ClassName DEFAULT_FULL_HTTP_RESPONSE = ClassName.get(DefaultFullHttpResponse.class);
 
-  // Create our sandbox of allowed imports
+  // SANDBOX DEFINITION
   private static final FieldSpec bb = FieldSpec.builder(BYTE_BUF, "bb").addModifiers(PRIVATE, STATIC).build();
   private static final FieldSpec byte_string = FieldSpec.builder(BYTE_STRING, "byte_string").addModifiers(PRIVATE, STATIC).build();
   private static final FieldSpec unpooled = FieldSpec.builder(UNPOOLED, "unpooled").addModifiers(PRIVATE, STATIC).build();
@@ -71,11 +73,11 @@ public class JavaGenerator {
       .addModifiers(PUBLIC, FINAL)
       .addField(bb)
       .addField(byte_string)
+      .addField(unpooled)
       .addField(http_version)
       .addField(full_http_response)
       .addField(http_response_status)
       .addField(deafult_full_http_response)
-      .addField(unpooled)
       .addField(functionToRegister)
       .addMethod(functionEntryPoint)
       .build();

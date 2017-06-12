@@ -2,7 +2,9 @@ package com.xjeffrose.nsfs;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AppConfig {
   private final Config config = ConfigFactory.load();
 

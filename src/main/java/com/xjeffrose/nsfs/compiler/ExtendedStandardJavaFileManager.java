@@ -5,7 +5,9 @@ import javax.tools.FileObject;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ExtendedStandardJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> {
 
   private CompiledCode compiledCode;

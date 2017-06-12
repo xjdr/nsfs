@@ -3,7 +3,9 @@ package com.xjeffrose.nsfs.compiler;
 import java.io.IOException;
 import java.net.URI;
 import javax.tools.SimpleJavaFileObject;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class SourceCode extends SimpleJavaFileObject {
   private String contents = null;
 

@@ -24,8 +24,9 @@ import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.KeyManagerFactory;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 public class TLS  {
   private static final String PASSWORD = "passwordsAreGood";
 

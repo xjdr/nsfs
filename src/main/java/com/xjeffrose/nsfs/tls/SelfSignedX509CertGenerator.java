@@ -12,6 +12,7 @@ import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 import sun.security.x509.AlgorithmId;
 import sun.security.x509.CertificateAlgorithmId;
 import sun.security.x509.CertificateIssuerName;
@@ -26,6 +27,7 @@ import sun.security.x509.X509CertInfo;
 
 //import java.util.logging.Logger;
 
+@Slf4j
 final class SelfSignedX509CertGenerator {
 //  private static final Logger log = Log.getLogger(SelfSignedX509CertGenerator.class.getName());
 

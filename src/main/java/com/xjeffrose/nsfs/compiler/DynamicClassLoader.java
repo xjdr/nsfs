@@ -2,7 +2,9 @@ package com.xjeffrose.nsfs.compiler;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class DynamicClassLoader extends ClassLoader {
 
   private Map<String, CompiledCode> customCompiledCode = new HashMap<>();
