@@ -60,10 +60,13 @@ public class Server implements Runnable {
     } catch (Exception e) {
       // TODO(JR): We should prob return the compiler errors in the error response body
       log.error("Error Registering Function", (Throwable) e);
+
+      String errorString = e.toString();
+
       HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-        HttpResponseStatus.BAD_REQUEST);
+        HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(errorString.getBytes()));
       response.headers().set(CONTENT_TYPE, "text/plain");
-      response.headers().setInt(CONTENT_LENGTH, 0);
+      response.headers().setInt(CONTENT_LENGTH, errorString.length());
 
       return response;
     }
