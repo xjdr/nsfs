@@ -12,6 +12,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import static javax.lang.model.element.Modifier.FINAL;
@@ -22,6 +23,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 @Slf4j
 public class JavaGenerator {
 
+  private static final TypeName functionSpec = ParameterizedTypeName.get(Function.class, HttpRequest.class, HttpResponse.class);
   private static final ClassName HTTP_REQUEST = ClassName.get(HttpRequest.class);
   private static final ClassName HTTP_RESPONSE = ClassName.get(HttpResponse.class);
 
@@ -30,16 +32,16 @@ public class JavaGenerator {
 
   public static Function<HttpRequest, HttpResponse> generateClass(String className, String functionBody) throws Exception {
 
-    MethodSpec onRequest = MethodSpec.methodBuilder("onRequest")
+    MethodSpec getFunction = MethodSpec.methodBuilder("getFunction")
       .addModifiers(PUBLIC, FINAL)
-      .addParameter(HTTP_REQUEST, "request")
-      .addCode(CodeBlock.builder().add(functionBody).build())
-      .returns(HTTP_RESPONSE)
+      .addCode(CodeBlock.builder().add("onRequest = " + functionBody + ";").build())
+      .addStatement("return onRequest")
+      .returns(functionSpec)
       .build();
 
     TypeSpec nsfsGeneratedClass = TypeSpec.classBuilder(className)
       .addModifiers(PUBLIC, FINAL)
-      .addMethod(onRequest)
+      .addMethod(getFunction)
       .superclass(JavaBaseClass.class)
       .build();
 
