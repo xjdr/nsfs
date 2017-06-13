@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import okio.ByteString;
 
 @Slf4j
-public abstract class JavaBaseClass implements GeneratedFunction {
+public abstract class JavaBaseClass {
 
   protected ByteBuf bb;
 
@@ -29,14 +29,8 @@ public abstract class JavaBaseClass implements GeneratedFunction {
 
   protected DefaultFullHttpResponse default_full_http_response;
 
-  public final GeneratedFunction getGeneratedFunction() {
-    return this;
-  }
+  protected Function<HttpRequest, HttpResponse> onRequest;
 
-  public final Function<HttpRequest, HttpResponse> getFunction() {
-    return this::onRequest;
-  }
-
-  public abstract HttpResponse onRequest(HttpRequest request);
+  public abstract Function<HttpRequest, HttpResponse> getFunction();
 
 }

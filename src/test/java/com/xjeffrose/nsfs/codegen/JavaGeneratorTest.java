@@ -16,7 +16,7 @@ public class JavaGeneratorTest {
   @Test
   public void generateClass() throws Exception {
     HttpRequest testReq = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
-    String functionBody = ""
+    String functionBody = "request -> {"
       +      "String respMsg = \"OK\";\n"
       + "\n"
       + "    FullHttpResponse response = new DefaultFullHttpResponse(\n"
@@ -27,7 +27,8 @@ public class JavaGeneratorTest {
       + "      response.headers().set(CONTENT_TYPE, \"text/plain\");\n"
       + "      response.headers().setInt(CONTENT_LENGTH, respMsg.length());\n"
       + "\n"
-      + "    return response;";
+      + "    return response;"
+      + "}";
 
     Function<HttpRequest, HttpResponse> functionToRegister = JavaGenerator
       .generateClass("TestClassName", functionBody);
