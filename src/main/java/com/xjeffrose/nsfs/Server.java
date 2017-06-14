@@ -1,21 +1,15 @@
 package com.xjeffrose.nsfs;
 
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
+import static com.xjeffrose.nsfs.http.Recipes.*;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 import com.xjeffrose.nsfs.codegen.JavaGenerator;
 import com.xjeffrose.nsfs.http.Router;
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.function.Function;
@@ -38,15 +32,7 @@ public class Server implements Runnable {
 
     String respMsg = "OK";
 
-    FullHttpResponse response = new DefaultFullHttpResponse(
-      HttpVersion.HTTP_1_1,
-      HttpResponseStatus.OK,
-      Unpooled.copiedBuffer(respMsg.getBytes()));
-
-    response.headers().set(CONTENT_TYPE, "text/plain");
-    response.headers().setInt(CONTENT_LENGTH, respMsg.length());
-
-    return response;
+    return newResponseOk(respMsg);
   };
 
   private final Function<HttpRequest, HttpResponse> addFunction = x -> {
@@ -60,30 +46,15 @@ public class Server implements Runnable {
     } catch (Exception e) {
       // TODO(JR): We should prob return the compiler errors in the error response body
       log.error("Error Registering Function", (Throwable) e);
-
       String errorString = e.toString();
 
-      HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-        HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer(errorString.getBytes()));
-      response.headers().set(CONTENT_TYPE, "text/plain");
-      response.headers().setInt(CONTENT_LENGTH, errorString.length());
-
-      return response;
+      return newResponseBadRequest(errorString);
     }
 
     String respMsg = "OK";
 
     // TODO(JR): We need a more reasonable return body with more useful info
-    FullHttpResponse response = new DefaultFullHttpResponse(
-      HttpVersion.HTTP_1_1,
-      HttpResponseStatus.OK,
-      Unpooled.copiedBuffer(respMsg.getBytes())
-    );
-
-    response.headers().set(CONTENT_TYPE, "text/plain");
-    response.headers().setInt(CONTENT_LENGTH, respMsg.length());
-
-    return response;
+    return newResponseOk(respMsg);
   };
 
   public Server() {

@@ -198,6 +198,12 @@
             <!-- disable lombok during tests -->
             <lombok.disable>true</lombok.disable>
           </systemPropertyVariables>
+          <systemProperties>
+            <property>
+              <name>derby.stream.error.file</name>
+              <value>${project.build.directory}/derby.log</value>
+            </property>
+          </systemProperties>
         </configuration>
       </plugin>
 

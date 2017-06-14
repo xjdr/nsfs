@@ -23,19 +23,12 @@ public class JavaGeneratorTest {
   @Test
   public void generateClass() throws Exception {
     HttpRequest testReq = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
-    String functionBody = "request -> {"
-      +      "String respMsg = \"OK\";\n"
-      + "\n"
-      + "    FullHttpResponse response = new DefaultFullHttpResponse(\n"
-      + "      HttpVersion.HTTP_1_1,\n"
-      + "      HttpResponseStatus.OK,\n"
-      + "      Unpooled.copiedBuffer(respMsg.getBytes()));\n"
-      + "    \n"
-      + "      response.headers().set(CONTENT_TYPE, \"text/plain\");\n"
-      + "      response.headers().setInt(CONTENT_LENGTH, respMsg.length());\n"
-      + "\n"
-      + "    return response;"
-      + "}";
+    String functionBody = Joiner.on("\n")
+      .join("request -> {",
+            "  String respMsg = \"OK\";",
+            "",
+            "  return newResponseOk(respMsg);",
+            "}");
 
     Function<HttpRequest, HttpResponse> functionToRegister = JavaGenerator
       .generateClass("TestClassName", functionBody);
@@ -106,15 +99,7 @@ public class JavaGeneratorTest {
                   "",
                   "String respMsg = Integer.toString(result);",
                   "",
-                  "FullHttpResponse response = new DefaultFullHttpResponse(",
-                  "  HttpVersion.HTTP_1_1,",
-                  "  HttpResponseStatus.OK,",
-                  "  Unpooled.copiedBuffer(respMsg.getBytes()));",
-                  "",
-                  "response.headers().set(CONTENT_TYPE, \"text/plain\");",
-                  "response.headers().setInt(CONTENT_LENGTH, respMsg.length());",
-                  "",
-                  "return response;"
+                  "return newResponseOk(respMsg);"
                   ),
             "} catch (SQLException | ClassNotFoundException e) {",
             "e.printStackTrace();",

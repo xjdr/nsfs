@@ -47,6 +47,7 @@ public class JavaGenerator {
 
     JavaFile javaFile = JavaFile.builder("com.xjeffrose.nsfs", nsfsGeneratedClass)
       .addStaticImport(io.netty.handler.codec.http.HttpHeaderNames.class, "*")
+      .addStaticImport(com.xjeffrose.nsfs.http.Recipes.class, "*")
       .build();
 
     JavaImportInjector importInjector = new JavaImportInjector();
