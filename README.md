@@ -16,7 +16,22 @@ to test:
 
 this loads a function
 ```bash
- $> curl -k https://localhost:8080/addFunction -X POST -d '{"route": "/hello", "functionBody": "request -> { String respMsg = \"OK\"; FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(respMsg.getBytes())); response.headers().set(CONTENT_TYPE, \"text\/plain\"); response.headers().setInt(CONTENT_LENGTH, respMsg.length());  return response; } " } ' -vvvv
+ $> curl -k https://localhost:8080/addFunction \
+    -X POST -d '{"route": "/hello", 
+    "functionBody": "request -> { 
+      String respMsg = \"OK\"; 
+    
+      FullHttpResponse response = new DefaultFullHttpResponse(
+      HttpVersion.HTTP_1_1, 
+      HttpResponseStatus.OK, 
+      Unpooled.copiedBuffer(respMsg.getBytes())); 
+    
+      response.headers().set(CONTENT_TYPE, \"text\/plain\"); 
+      response.headers().setInt(CONTENT_LENGTH, respMsg.length());  
+    
+      return response; } " 
+    
+    } ' -vvvv
  $> OK
 ```
 
