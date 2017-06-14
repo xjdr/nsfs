@@ -29,7 +29,7 @@ public class Server implements Runnable {
 
   private final Router router = new Router();
   private final Moshi moshi = new Moshi.Builder().build();
-  private final Type type = Types.newParameterizedType(HostedFunction.class);
+  private final Type type = Types.getRawType(HostedFunction.class);
   private final JsonAdapter<HostedFunction> adapter = moshi.adapter(type);
 
   private final Function<HttpRequest, HttpResponse> healthCheck = x -> {
@@ -55,7 +55,7 @@ public class Server implements Runnable {
       HostedFunction f = adapter.fromJson(ByteString.of(((FullHttpRequest) x).content().nioBuffer()).utf8());
 
       // TODO(JR): We need a better naming convention
-      router.addRoute(f.route, JavaGenerator.generateClass(f.route, f.functionBody));
+      router.addRoute(f.route, JavaGenerator.generateClass("hello" , f.functionBody));
 
     } catch (Exception e) {
       // TODO(JR): We should prob return the compiler errors in the error response body
@@ -109,8 +109,12 @@ public class Server implements Runnable {
     start();
   }
 
+  public void close() {
+    router.shutdown();
+  }
+
   @AllArgsConstructor
-  private class HostedFunction {
+  private static class HostedFunction {
 
     private final String route;
     private final String functionBody;

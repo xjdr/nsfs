@@ -8,8 +8,15 @@ public class Main {
   public static void main(String[] args) {
     Server server = new Server();
 
-    new Thread(new Server());
+    server.start();
 
+//    try {
+//      server.start();
+//    } catch (Exception e) {
+//
+//    } finally {
+//      server.close();
+//    }
   }
 
 }
