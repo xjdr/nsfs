@@ -64,7 +64,6 @@ public class JavaGeneratorTest {
               "count INT NOT NULL, ",
               "PRIMARY KEY (id))"
               );
-      //System.out.println(DDL);
       Statement stmnt = connection.createStatement();
       stmnt.executeUpdate(DDL);
       return connection;
@@ -74,23 +73,6 @@ public class JavaGeneratorTest {
   @Test
   public void generateStatefulClass() throws Exception {
     HttpRequest testReq = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
-    /*
-    try (ResultSet rs = statement.executeQuery("SELECT * FROM test_table WHERE name = 'bob'")) {
-      if (rs.next()) {
-        statement.executeUpdate("UPDATE test_table SET count = count + 1 WHERE name = 'bob'");
-      } else {
-        statement.executeUpdate("INSERT INTO test_table (name, count) VALUES ('bob', 1)");
-      }
-    }
-    */
-    String upsert = Joiner.on(" ")
-      .join(
-            "MERGE INTO test_table USING test_table AS B ON (name = 'bob')",
-            "WHEN MATCHED THEN",
-            "UPDATE SET count = count + 1",
-            "WHEN NOT MATCHED THEN",
-            "INSERT (name, count) VALUES ('bob', 1)"
-            );
     String query = Joiner.on(" ")
       .join("SELECT * FROM test_table",
             "WHERE name = 'bob'"
@@ -119,8 +101,6 @@ public class JavaGeneratorTest {
                   "    statement.executeUpdate(\"" + inserter + "\");",
                   "  }",
                   "}",
-                  //                  "statement.executeUpdate(\"" + upsert + "\");",
-                  //"statement.executeUpdate(\"insert into test_table (name, count) values ('bob', 1)\");",
                   "ResultSet rs = statement.executeQuery(\"" + query + "\");",
                   "",
                   "System.out.println(\"warnings: \" + rs.getWarnings());",
