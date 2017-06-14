@@ -47,20 +47,14 @@ public class JavaGenerator {
 
     JavaFile javaFile = JavaFile.builder("com.xjeffrose.nsfs", nsfsGeneratedClass)
       .addStaticImport(io.netty.handler.codec.http.HttpHeaderNames.class, "*")
-      .addStaticImport(java.util.BitSet.class, "*") // HACK!!
       .build();
 
-    String source = javaFile.toString();
-    // HACK!! {{{
-    String imports = new StringBuilder()
-      .append("import io.netty.handler.codec.http.*;")
-      .append("\n")
-      .append("import io.netty.buffer.*;")
-      .append("\n")
-      .toString();
+    JavaImportInjector importInjector = new JavaImportInjector();
+    importInjector.addImport("io.netty.handler.codec.http.*");
+    importInjector.addImport("io.netty.buffer.*");
+    javaFile.writeTo(importInjector);
+    String source = importInjector.toString();
 
-    source = source.replace("import static java.util.BitSet.*;", imports);
-    // HACK! }}}
     // For Debugging - Keep Commented OUT
     // System.out.println(source);
 
