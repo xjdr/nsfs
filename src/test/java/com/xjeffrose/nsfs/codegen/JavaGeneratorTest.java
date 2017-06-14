@@ -53,8 +53,6 @@ public class JavaGeneratorTest {
         return connection;
       }
       String connectionURL = "jdbc:derby:memory:testDB;create=true";
-      String driver = "org.apache.derby.jdbc.EmbeddedDriver";
-      Class.forName(driver); // Loads the driver
       connection = DriverManager.getConnection(connectionURL);
       String DDL = Joiner.on("\n")
         .join(
@@ -103,9 +101,7 @@ public class JavaGeneratorTest {
                   "}",
                   "ResultSet rs = statement.executeQuery(\"" + query + "\");",
                   "",
-                  "System.out.println(\"warnings: \" + rs.getWarnings());",
                   "boolean r = rs.next();",
-                  "System.out.println(\"result: \" + r);",
                   "int result = rs.getInt(\"count\");",
                   "",
                   "String respMsg = Integer.toString(result);",
