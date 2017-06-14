@@ -30,7 +30,7 @@ public class JavaGenerator {
   public JavaGenerator() {
   }
 
-  public static Function<HttpRequest, HttpResponse> generateClass(String className, String functionBody) throws Exception {
+  public static Function<HttpRequest, HttpResponse> generateClass(String className, String functionBody, Class<? extends JavaBaseClass> baseClass) throws Exception {
 
     MethodSpec getFunction = MethodSpec.methodBuilder("getFunction")
       .addModifiers(PUBLIC, FINAL)
@@ -42,7 +42,7 @@ public class JavaGenerator {
     TypeSpec nsfsGeneratedClass = TypeSpec.classBuilder(className)
       .addModifiers(PUBLIC, FINAL)
       .addMethod(getFunction)
-      .superclass(JavaBaseClass.class)
+      .superclass(baseClass)
       .build();
 
     JavaFile javaFile = JavaFile.builder("com.xjeffrose.nsfs", nsfsGeneratedClass)
@@ -52,6 +52,7 @@ public class JavaGenerator {
     JavaImportInjector importInjector = new JavaImportInjector();
     importInjector.addImport("io.netty.handler.codec.http.*");
     importInjector.addImport("io.netty.buffer.*");
+    importInjector.addImport("java.sql.*");
     javaFile.writeTo(importInjector);
     String source = importInjector.toString();
 
@@ -68,6 +69,10 @@ public class JavaGenerator {
       // We need to make a real exception
       throw new Exception();
     }
+  }
+
+  public static Function<HttpRequest, HttpResponse> generateClass(String className, String functionBody) throws Exception {
+    return generateClass(className, functionBody, JavaBaseClass.class);
   }
 
 }
