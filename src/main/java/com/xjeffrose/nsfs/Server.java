@@ -7,6 +7,7 @@ import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 import com.xjeffrose.nsfs.codegen.JavaGenerator;
 import com.xjeffrose.nsfs.http.Router;
+import com.xjeffrose.nsfs.http.RouteValidator;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
@@ -35,14 +36,29 @@ public class Server implements Runnable {
     return newResponseOk(respMsg);
   };
 
-  private final Function<HttpRequest, HttpResponse> addFunction = x -> {
+  final Function<HttpRequest, HttpResponse> addFunction = x -> {
     try {
 
       HostedFunction f = adapter.fromJson(ByteString.of(((FullHttpRequest) x).content().nioBuffer()).utf8());
 
+      // Validate Route
+      if (!RouteValidator.isValid(f.route)) {
+        return newResponseBadRequest("Invalid Route: " + f.route);
+      }
+      // TODO(CK): valid routes should be mangled into a generated class name
+      String route = "/functions" + f.route;
       // TODO(JR): We need a better naming convention
-      router.addRoute(f.route, JavaGenerator.generateClass("hello" , f.functionBody));
+      String className = "hello";
+      // TODO(CK): generateClass should return an Optional, we know that compilation may fail
+      Function<HttpRequest, HttpResponse> newFunction = JavaGenerator.generateClass(className, f.functionBody);
+      // TODO(CK): check for collision with existing routes
+      router.addRoute(route, newFunction);
 
+      GeneratedFunction generatedFunction = new GeneratedFunction(route, "stateless", className);
+
+      String payload = moshi.adapter(GeneratedFunction.class).toJson(generatedFunction);
+
+      return newResponseOk(payload, ContentType.Application_Json);
     } catch (Exception e) {
       // TODO(JR): We should prob return the compiler errors in the error response body
       log.error("Error Registering Function", (Throwable) e);
@@ -50,11 +66,6 @@ public class Server implements Runnable {
 
       return newResponseBadRequest(errorString);
     }
-
-    String respMsg = "OK";
-
-    // TODO(JR): We need a more reasonable return body with more useful info
-    return newResponseOk(respMsg);
   };
 
   public Server() {
@@ -85,12 +96,18 @@ public class Server implements Runnable {
   }
 
   @AllArgsConstructor
-  private static class HostedFunction {
+  static class HostedFunction {
 
     private final String route;
     private final String functionBody;
 
   }
 
+  @AllArgsConstructor
+  static class GeneratedFunction {
+    final String route;
+    final String type;
+    final String className;
+  }
 
 }
