@@ -1,0 +1,104 @@
+* NSFS
+
+** naming conventions
+
+*** function route urls must have valid characters
+
+**** DONE reject bad urls
+
+*** function route urls have to be unique
+
+**** TODO reject duplicate urls
+
+**** DONE function urls should be scoped under '/functions/'
+
+*** how to name functions?
+
+**** naming should allow scoping for sandboxing, database, etc.
+
+*** how to name classes?
+
+**** function route urls can be mangled into generated class names
+
+** debug
+
+*** after function is created return
+    - route url
+    - function type
+    - generated classname
+    - generated database name (if any)
+
+** sandboxing
+
+*** how to prevent explicit class references?
+
+** state
+
+*** RDBMS
+
+**** how to cache database connections?
+
+**** table creation statement needs to be provided
+
+***** table should only be created once
+
+**** maybe use OrmLite?
+
+**** database connections need to be pooled
+
+**** one database per function?
+
+***** function route urls can be mangled into generated database names
+
+** class generation
+
+*** DONE maybe use extends instead of explicit class generation?
+
+*** classes need to be generated in com.xjeffrose.nsfs.generated
+
+* Misc
+
+** in memory database
+
+*** ij commands
+
+#+begin_src
+java  -Djdbc.drivers=org.apache.derby.jdbc.EmbeddedDriver -cp ~/.m2/repository/org/apache/derby/derbytools/10.13.1.1/derbytools-10.13.1.1.jar:~/.m$HOME/repository/org/apache/derby/derby/10.13.1.1/derby-10.13.1.1.jar org.apache.derby.tools.ij
+ij version 10.13
+ij> M-C02TN11MGTDX:nsfs bvjp$ fc
+java -Djdbc.drivers=org.apache.derby.jdbc.EmbeddedDriver -cp ~/.m2/repository/org/apache/derby/derbytools/10.13.1.1/derbytools-10.13.1.1.jar:$HOME/.m2/repository/org/apache/derby/derby/10.13.1.1/derby-10.13.1.1.jar org.apache.derby.tools.ij
+ij version 10.13
+ij> driver 'org.apache.derby.jdbc.EmbeddedDriver';
+ij> connect 'jdbc:derby:memory:testDB;create=true';
+ij>
+CREATE TABLE test_table (
+id INT NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+name VARCHAR(20) NOT NULL,
+count INT NOT NULL,
+PRIMARY KEY (id));
+CREATE TABLE dummy (
+id INT NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+PRIMARY KEY (id));
+
+MERGE INTO test_table
+USING dummy
+ON test_table.name = 'bob'
+WHEN MATCHED THEN
+  UPDATE SET count = count + 1
+WHEN NOT MATCHED THEN
+  INSERT (name, count) VALUES ('bob', 1)
+
+
+MERGE INTO test_table as A
+USING (SELECT * from test_table) as B
+ON A.name = B.name AND A.name = 'bob'
+WHEN MATCHED THEN
+  UPDATE SET A.count = A.count + 1
+WHEN NOT MATCHED THEN
+  INSERT (name, count) VALUES ('bob', 1)
+
+#+end_src
+
+** maven invoke single test
+
+*** http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
